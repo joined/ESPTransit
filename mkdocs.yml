@@ -1,0 +1,54 @@
+site_name: ESPTransit
+site_description: Departure board display for German rail/transit on ESP32-P4
+site_url: https://esptrans.it/
+repo_url: https://github.com/joined/esptransit
+repo_name: joined/esptransit
+
+docs_dir: docs
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: orange
+      accent: yellow
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: orange
+      accent: yellow
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  logo: assets/logo.svg
+  favicon: assets/favicon.svg
+  features:
+    - content.code.copy
+    - navigation.sections
+
+plugins:
+  - glightbox
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+
+extra_css:
+  - css/flash.css
+
+extra_javascript:
+  - path: js/flash.js
+    type: module
+
+nav:
+  - Home: index.md
+  - User Guide: usage.md
+  - Supported Hardware: hardware.md
+  - Web Flasher: flash.md
+  - Development:
+      - development.md
+      - Simulator: simulator.md

@@ -1,0 +1,9 @@
+## IDF Component Manager Manifest File
+dependencies:
+  lvgl/lvgl:
+    version: ^9
+    public: true
+  espressif/esp_wifi_remote: "*"
+  espressif/esp_hosted: "*"
+  bblanchon/arduinojson:
+    version: "^7"

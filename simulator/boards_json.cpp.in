@@ -1,0 +1,2 @@
+// Auto-generated — do not edit. Source: boards.json via CMake configure_file.
+extern const char *const kBoardsJsonContent = R"boards_json(@BOARDS_JSON_CONTENT@)boards_json";

@@ -1,0 +1,4 @@
+# Release build overrides — applied after sdkconfig.defaults to disable
+# development-only features (perf overlay, runtime stats).
+CONFIG_LV_USE_SYSMON=n
+CONFIG_LV_USE_PERF_MONITOR=n

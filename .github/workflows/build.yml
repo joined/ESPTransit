@@ -1,0 +1,204 @@
+name: Build
+
+on:
+  push:
+    branches: ['**']
+  workflow_call:
+    inputs:
+      ref:
+        description: "Git ref to check out (tag, branch, or SHA)"
+        type: string
+        required: false
+        default: ''
+      release:
+        description: "Apply release sdkconfig overrides (disables perf monitor, etc.)"
+        type: boolean
+        required: false
+        default: false
+
+jobs:
+  format:
+    name: Run prek formatting/lint hooks
+    runs-on: ubuntu-24.04
+
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        ref: ${{ inputs.ref || '' }}
+    - uses: jdx/mise-action@v4
+    - name: Install clang-format
+      run: sudo apt-get update && sudo apt-get install -y clang-format-20
+    - run: prek run --all-files
+
+  build-simulator:
+    name: Build Simulator
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v6
+      with:
+        ref: ${{ inputs.ref || '' }}
+        fetch-tags: true
+
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential cmake ccache cppcheck libsdl2-dev libcurl4-openssl-dev
+
+    - name: Setup ccache
+      uses: actions/cache@v5
+      with:
+        path: ~/.cache/ccache
+        key: sim-ccache-${{ hashFiles('shared/**', 'simulator/**') }}
+        restore-keys: sim-ccache-
+
+    - name: Cache FetchContent dependencies
+      uses: actions/cache@v5
+      with:
+        path: simulator/build/_deps
+        key: sim-fetchcontent-${{ hashFiles('simulator/CMakeLists.txt') }}
+        restore-keys: sim-fetchcontent-
+
+    - name: Configure CMake
+      working-directory: simulator
+      run: |
+        mkdir -p build
+        cd build
+        cmake .. -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+
+    - name: Run cppcheck (simulator + shared)
+      run: python3 scripts/run_cppcheck.py --target simulator
+
+    - name: Build simulator
+      working-directory: simulator/build
+      run: make -j$(nproc)
+
+    - name: Upload simulator binary
+      uses: actions/upload-artifact@v7
+      with:
+        name: esptransit-simulator
+        path: simulator/build/bin/esptransit_sim
+        retention-days: 30
+
+  ui-tests:
+    name: UI Smoke Tests
+    runs-on: ubuntu-latest
+    needs: build-simulator
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v6
+      with:
+        ref: ${{ inputs.ref || '' }}
+
+    - name: Install runtime dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libsdl2-dev libcurl4-openssl-dev
+
+    - name: Download simulator binary artifact
+      uses: actions/download-artifact@v8
+      with:
+        name: esptransit-simulator
+        path: simulator/build/bin
+
+    - name: Ensure simulator binary is executable
+      run: chmod +x simulator/build/bin/esptransit_sim
+
+    - name: Set up mise tools
+      uses: jdx/mise-action@v4
+
+    - name: Run simulator UI smoke tests (headless, golden compare)
+      env:
+        SDL_VIDEODRIVER: dummy
+        SIMULATOR_TEST_TIMEOUT: 3
+      run: mise run ui-test-runner
+
+    - name: Upload UI smoke screenshots
+      if: always()
+      uses: actions/upload-artifact@v7
+      with:
+        name: ui-smoke-screenshots
+        path: .artifacts/ui-smoke-screenshots
+        if-no-files-found: warn
+        retention-days: 14
+
+  list-boards:
+    name: List boards from boards.json
+    runs-on: ubuntu-latest
+    outputs:
+      boards: ${{ steps.boards.outputs.boards }}
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        ref: ${{ inputs.ref || '' }}
+    - id: boards
+      run: echo "boards=$(jq -c '[to_entries[] | select(.value.build != false) | .key]' boards.json)" >> "$GITHUB_OUTPUT"
+
+  build-esp:
+    name: Build ESP Firmware (${{ matrix.board }})
+    runs-on: ubuntu-latest
+    needs: list-boards
+    container:
+      image: espressif/idf:v5.5.2
+
+    strategy:
+      fail-fast: false
+      matrix:
+        board: ${{ fromJSON(needs.list-boards.outputs.boards) }}
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v6
+      with:
+        ref: ${{ inputs.ref || '' }}
+        fetch-tags: true
+
+    - name: Install cppcheck
+      run: |
+        apt-get update
+        apt-get install -y cppcheck
+
+    - name: Setup ccache
+      uses: actions/cache@v5
+      with:
+        path: ~/.cache/ccache
+        key: esp-ccache-${{ matrix.board }}-${{ hashFiles('shared/**', 'esp/**') }}
+        restore-keys: esp-ccache-${{ matrix.board }}-
+
+    - name: Build firmware
+      working-directory: esp
+      env:
+        IDF_CCACHE_ENABLE: 1
+        SDKCONFIG_DEFAULTS: ${{ inputs.release && 'sdkconfig.defaults;sdkconfig.release' || 'sdkconfig.defaults' }}
+      run: |
+        . $IDF_PATH/export.sh
+        idf.py -B build_${{ matrix.board }} -DBOARD=${{ matrix.board }} build
+
+    - name: Verify dependencies.lock manifest_hash is up to date
+      run: |
+        git config --global --add safe.directory "$GITHUB_WORKSPACE"
+        if git diff -- esp/dependencies.lock | grep -q '^[+-].*manifest_hash:'; then
+          echo "::error file=esp/dependencies.lock::idf_component.yml changed but esp/dependencies.lock was not updated. Run an ESP IDF build locally and commit the updated lockfile."
+          exit 1
+        fi
+
+    - name: Run cppcheck (ESP + shared)
+      run: python3 scripts/run_cppcheck.py --target esp --board ${{ matrix.board }}
+
+    - name: Upload firmware artifacts
+      uses: actions/upload-artifact@v7
+      with:
+        name: esptransit-firmware-${{ matrix.board }}
+        path: |
+          esp/build_${{ matrix.board }}/bootloader/bootloader.bin
+          esp/build_${{ matrix.board }}/partition_table/partition-table.bin
+          esp/build_${{ matrix.board }}/ESPTransit.bin
+          esp/build_${{ matrix.board }}/flash_args
+        retention-days: 30
