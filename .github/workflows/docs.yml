@@ -75,7 +75,7 @@ jobs:
           cat docs/firmware/index.json
 
       - run: uv run --group docs mkdocs build --strict
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v4
         with:
           path: site
 
