@@ -1,0 +1,90 @@
+name: Docs
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: jdx/mise-action@v4
+
+      - name: Get board list
+        id: boards
+        run: echo "boards=$(jq -c '[to_entries[] | select(.value.build != false) | .key]' boards.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Download firmware from all releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tags=$(gh release list --json tagName --jq '.[].tagName')
+          if [ -z "$tags" ]; then
+            echo "No releases found, skipping firmware download"
+            mkdir -p docs/firmware
+            echo '{"releases":[]}' > docs/firmware/index.json
+            exit 0
+          fi
+
+          boards='${{ steps.boards.outputs.boards }}'
+          releases_json="[]"
+
+          for tag in $tags; do
+            tag_boards="[]"
+            for board in $(echo "$boards" | jq -r '.[]'); do
+              mkdir -p "docs/firmware/$tag/$board"
+
+              # Download board-prefixed assets
+              ok=true
+              for file in bootloader.bin partition-table.bin esptransit.bin; do
+                if ! gh release download "$tag" \
+                  --pattern "${board}-${file}" \
+                  --output "docs/firmware/$tag/$board/$file" \
+                  --clobber 2>/dev/null; then
+                  ok=false
+                  break
+                fi
+              done
+
+              if [ "$ok" = true ]; then
+                tag_boards=$(echo "$tag_boards" | jq --arg b "$board" '. + [$b]')
+                echo "  Downloaded $board firmware for $tag"
+              else
+                rm -rf "docs/firmware/$tag/$board"
+                echo "  Skipping $board for $tag (assets not found)"
+              fi
+            done
+
+            if [ "$(echo "$tag_boards" | jq 'length')" -gt 0 ]; then
+              releases_json=$(echo "$releases_json" | jq --arg t "$tag" --argjson b "$tag_boards" '. + [{"tag": $t, "boards": $b}]')
+            fi
+          done
+
+          mkdir -p docs/firmware
+          echo "{\"releases\": $releases_json}" | jq '.' > docs/firmware/index.json
+          echo "Generated firmware/index.json:"
+          cat docs/firmware/index.json
+
+      - run: uv run --group docs mkdocs build --strict
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

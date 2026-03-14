@@ -1,0 +1,27 @@
+dependencies:
+  esp_codec_dev:
+    public: true
+    version: ^1
+  espressif/esp_lcd_st7701:
+    version: ^2
+  espressif/esp_lcd_touch_gt911:
+    version: ^1
+  esp_lvgl_port:
+    path: ../esp_lvgl_port
+    public: true
+  idf: '>=5.3'
+  lvgl/lvgl:
+    public: true
+    version: 9.4.0
+description: >
+  Custom Board Support Package (BSP) for JC4880P443C board (ESP32-P4 based).
+  Based on espressif/esp32_p4_function_ev_board v4.1.1 with modifications for
+  ST7701 LCD controller, GT911 touch controller, and custom GPIO pinout.
+maintainer: Custom/Local
+tags:
+- bsp
+- custom
+- jc4880p443c
+targets:
+- esp32p4
+version: 1.0.0-jc4880p443c

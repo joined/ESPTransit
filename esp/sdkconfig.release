@@ -1,0 +1,6 @@
+# Release build overrides — applied after sdkconfig.defaults to disable
+# development-only features (perf overlay, runtime stats).
+CONFIG_LV_USE_SYSMON=n
+CONFIG_LV_USE_PERF_MONITOR=n
+CONFIG_FREERTOS_GENERATE_RUN_TIME_STATS=n
+CONFIG_FREERTOS_VTASKLIST_INCLUDE_COREID=n

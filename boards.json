@@ -1,0 +1,20 @@
+{
+	"jc8012p4a1c": {
+		"width": 800,
+		"height": 1280,
+		"diagonal_inches": 10.1,
+		"build": true
+	},
+	"jc4880p443c": {
+		"width": 480,
+		"height": 800,
+		"diagonal_inches": 4.3,
+		"build": true
+	},
+	"jc1060p470c": {
+		"width": 1024,
+		"height": 600,
+		"diagonal_inches": 7.0,
+		"build": true
+	}
+}

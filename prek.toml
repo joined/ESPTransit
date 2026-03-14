@@ -1,0 +1,73 @@
+exclude = { glob = [
+  "simulator/lvgl/**",
+  "simulator/FreeRTOS/**",
+  "esp/managed_components/**",
+  "esp/components/bsp_jc8012p4a1c/**",
+  "esp/components/bsp_jc4880p443c/**",
+  "esp/components/bsp_jc1060p470c/**",
+  "esp/components/esp_lcd_touch_gsl3680/**",
+  "build/**",
+  "shared/ui/fonts/**",
+  "docs/**",
+] }
+
+[[repos]]
+repo = "builtin"
+hooks = [
+  { id = "trailing-whitespace" },
+  { id = "end-of-file-fixer" },
+]
+
+[[repos]]
+repo = "local"
+hooks = [
+  {
+    id = "clang-format",
+    name = "clang-format",
+    language = "system",
+    entry = "clang-format-20 -i",
+    types_or = ["c", "c++"],
+  },
+  {
+    id = "shfmt",
+    name = "shfmt",
+    language = "system",
+    entry = "shfmt -w",
+    types = ["shell"],
+  },
+  {
+    id = "shellcheck",
+    name = "shellcheck",
+    language = "system",
+    entry = "shellcheck -x",
+    types = ["shell"],
+  },
+  {
+    id = "biome-check",
+    name = "biome-check",
+    language = "system",
+    entry = "biome check --write --no-errors-on-unmatched",
+    types_or = ["html", "css", "javascript", "json"],
+  },
+  {
+    id = "ruff-check",
+    name = "ruff-check",
+    language = "system",
+    entry = "ruff check --fix",
+    types = ["python"],
+  },
+  {
+    id = "ruff-format",
+    name = "ruff-format",
+    language = "system",
+    entry = "ruff format",
+    types = ["python"],
+  },
+  {
+    id = "cmake-format",
+    name = "cmake-format",
+    language = "system",
+    entry = "cmake-format --in-place",
+    types = ["cmake"],
+  },
+]

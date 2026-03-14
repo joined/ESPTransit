@@ -1,0 +1,85 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version (e.g. v0.1.0)"
+        required: true
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  create-tag:
+    name: Create release tag
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Validate version format
+        run: |
+          if ! echo "${{ inputs.version }}" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$'; then
+            echo "::error::Version must match vX.Y.Z or vX.Y.Z-suffix (got: ${{ inputs.version }})"
+            exit 1
+          fi
+
+      - name: Check tag does not already exist
+        run: |
+          if git rev-parse "refs/tags/${{ inputs.version }}" >/dev/null 2>&1; then
+            echo "::error::Tag ${{ inputs.version }} already exists"
+            exit 1
+          fi
+
+      - name: Create and push tag
+        run: |
+          git tag "${{ inputs.version }}"
+          git push origin "${{ inputs.version }}"
+
+  build:
+    name: Build
+    needs: create-tag
+    uses: ./.github/workflows/build.yml
+    with:
+      ref: ${{ inputs.version }}
+      release: true
+
+  release:
+    name: Create GitHub Release
+    needs: [create-tag, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Get board list
+        id: boards
+        run: echo "boards=$(jq -c '[to_entries[] | select(.value.build != false) | .key]' boards.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Download firmware artifacts
+        uses: actions/download-artifact@v8
+        with:
+          path: artifacts
+          pattern: esptransit-firmware-*
+
+      - name: Prepare release assets
+        run: |
+          mkdir -p release-assets
+          for board in $(echo '${{ steps.boards.outputs.boards }}' | jq -r '.[]'); do
+            dir="artifacts/esptransit-firmware-$board"
+            cp "$dir/bootloader/bootloader.bin" "release-assets/${board}-bootloader.bin"
+            cp "$dir/partition_table/partition-table.bin" "release-assets/${board}-partition-table.bin"
+            cp "$dir/esptransit.bin" "release-assets/${board}-esptransit.bin"
+          done
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ inputs.version }}" \
+            --title "${{ inputs.version }}" \
+            --generate-notes \
+            release-assets/*

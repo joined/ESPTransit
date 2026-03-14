@@ -1,0 +1,23 @@
+[project]
+name = "esptransit"
+version = "0.1.0"
+description = "ESPTransit simulator test tooling"
+requires-python = ">=3.11"
+dependencies = []
+
+[tool.uv]
+package = false
+
+[dependency-groups]
+test = [
+  "pytest>=8.0,<10.0",
+  "pytest-xdist>=3.6,<4.0",
+  "pillow>=10.0,<13.0",
+]
+docs = [
+  "mkdocs-material>=9.0,<10.0",
+  "mkdocs-glightbox>=0.4,<1.0",
+]
+
+[tool.ruff]
+target-version = "py311"

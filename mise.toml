@@ -1,0 +1,95 @@
+[tools]
+biome = "latest"
+prek = "latest"
+ruff = "latest"
+shfmt = "latest"
+shellcheck = "latest"
+uv = "latest"
+"pipx:cmakelang" = "latest"
+
+[settings]
+python.uv_venv_auto = false
+
+[tasks.py-sync]
+description = "Create/update .venv with Python test dependencies"
+run = "uv sync --group test"
+
+[tasks.ui-test-runner]
+description = "Internal shared runner for simulator UI tests"
+run = '''
+uv run --group test pytest tests/ui -q -n "${PYTEST_XDIST_WORKERS:-auto}"
+'''
+
+[tasks.ui-test]
+description = "Run simulator UI smoke tests"
+depends = ["sim-build"]
+run = "SDL_VIDEODRIVER=dummy mise run ui-test-runner"
+
+[tasks.ui-test-live]
+description = "Run simulator UI smoke tests with interactive SDL window"
+depends = ["sim-build"]
+run = "mise run ui-test-runner"
+
+[tasks.ui-test-regen]
+description = "Regenerate UI screenshot baselines with headless SDL dummy driver"
+depends = ["sim-build"]
+run = "UPDATE_GOLDEN=1 SDL_VIDEODRIVER=dummy mise run ui-test-runner"
+
+[tasks.ui-test-regen-live]
+description = "Regenerate committed simulator UI screenshot baselines"
+depends = ["sim-build"]
+run = "UPDATE_GOLDEN=1 mise run ui-test-runner"
+
+[tasks.sim-clear-config]
+description = "Delete local simulator config file"
+run = "rm -f simulator/.simulator-config.json"
+
+[tasks.ui-golden-view]
+description = "Open local webpage to inspect tests/ui/golden screenshots at physical size"
+run = "uv run scripts/ui_golden_viewer.py"
+
+[tasks.biome-lint]
+description = "Lint and format Biome-managed files"
+run = "biome check --write"
+
+[tasks.biome-lint-check]
+description = "Check Biome-managed files formatting/linting"
+run = "biome check"
+
+[tasks.fonts-regen]
+description = "Regenerate LVGL font source files"
+run = "uv run scripts/regenerate_fonts.py"
+
+[tasks.sim-build]
+description = "Build the simulator only"
+run = '''
+cmake -S simulator -B simulator/build
+cmake --build simulator/build --parallel
+'''
+
+[tasks.sim]
+description = "Build and run the simulator"
+depends = ["sim-build"]
+usage = '''
+arg "[board]" help="Board ID from boards.json" default="jc8012p4a1c" {
+  choices "jc8012p4a1c" "jc4880p443c" "jc1060p470c"
+}
+arg "[sim_args]" var=#true help="Additional args forwarded to esptransit_sim"
+'''
+run = "simulator/build/bin/esptransit_sim --board {{arg(name='board')}} {{arg(name='sim_args')}}"
+
+[tasks.docs]
+description = "Serve docs site locally"
+run = "uv run --group docs mkdocs serve"
+
+[tasks.esp]
+description = "Run idf.py for JC8012P4A1C, e.g.: mise run esp build flash monitor"
+run = "scripts/idf.sh jc8012p4a1c"
+
+[tasks.esp-small]
+description = "Run idf.py for JC4880P443C, e.g.: mise run esp-small build flash monitor"
+run = "scripts/idf.sh jc4880p443c"
+
+[tasks.esp-medium]
+description = "Run idf.py for JC1060P470C (7-inch, 1024x600), e.g.: mise run esp-medium build flash monitor"
+run = "scripts/idf.sh jc1060p470c"

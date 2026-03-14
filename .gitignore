@@ -1,0 +1,13 @@
+build/
+build_*/
+managed_components/
+sdkconfig
+sdkconfig.old
+.vscode/
+simulator/.simulator-config.json
+.pytest_cache/
+__pycache__/
+.artifacts/
+.cache/
+.venv/
+site/

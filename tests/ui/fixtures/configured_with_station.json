@@ -1,0 +1,14 @@
+{
+	"v": 3,
+	"configured": true,
+	"rotation": 0,
+	"brightness": 80,
+	"split_mode": false,
+	"stations": [
+		{
+			"id": "900000003201",
+			"name": "Berlin Hauptbahnhof",
+			"lines": [{ "name": "S5", "product": "suburban" }]
+		}
+	]
+}

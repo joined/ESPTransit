@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ESPTransit Golden Screenshot Viewer</title>
+  <link rel="stylesheet" href="/app.css" />
+</head>
+<body>
+  <main class="layout">
+    <div class="toolbar">
+      <label for="zoomSelect" class="toolbar-label">Zoom</label>
+      <select id="zoomSelect" class="toolbar-select">
+        <option value="fit">Restrict to fit</option>
+        <option value="0.5">50%</option>
+        <option value="0.75">75%</option>
+        <option value="1">100%</option>
+        <option value="1.5">150%</option>
+        <option value="2">200%</option>
+      </select>
+      <button
+        class="sidebar-toggle"
+        id="toggleSidebar"
+        type="button"
+        aria-controls="settingsPanel"
+        aria-expanded="true"
+      >
+        Hide settings
+      </button>
+    </div>
+
+    <section class="panel controls" id="settingsPanel">
+      <h1>Golden Screenshot Viewer</h1>
+      <p class="subtitle">
+        View files from <code>tests/ui/golden</code> at real physical size.
+        Compare the same screenshot across resolution folders side-by-side.
+        Use <strong>Ruler calibration</strong> for monitor-agnostic sizing.
+      </p>
+
+      <div class="field-grid">
+        <div class="field wide">
+          <label for="scaleMode">Sizing mode</label>
+          <select id="scaleMode">
+            <option value="specs">Monitor specs + DPR</option>
+            <option value="calibrated">Ruler calibration (recommended on any monitor)</option>
+          </select>
+        </div>
+      </div>
+
+      <section class="mode-section">
+        <div class="field-grid">
+          <div class="field wide">
+            <label>Show screenshots for boards:</label>
+            <div id="boardCheckboxes" class="board-checkboxes"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="monitorSettings" class="mode-section">
+        <div class="field-grid">
+          <div class="field wide"><label for="monitorDiagonal">Monitor diagonal (in)</label><input id="monitorDiagonal" type="number" step="0.1" min="1"></div>
+        </div>
+      </section>
+
+      <section id="calibrationSection" class="calibration">
+        <p class="mini"><strong>Ruler calibration:</strong> measure the blue bar with a real ruler and enter the measured width in mm.</p>
+        <div class="field-grid">
+          <div class="field"><label for="calibrationBarPx">Calibration bar (CSS px)</label><input id="calibrationBarPx" type="number" step="1" min="20"></div>
+          <div class="field"><label for="calibrationMeasuredMm">Measured bar width (mm)</label><input id="calibrationMeasuredMm" type="number" step="0.1" min="1"></div>
+        </div>
+        <div class="calibration-bar-wrap" id="calibrationBarWrap"><div id="calibrationBar" class="calibration-bar"></div></div>
+        <p class="mini" id="calibrationActual"></p>
+      </section>
+
+      <div class="metrics" id="metrics"></div>
+      <div class="error" id="error"></div>
+    </section>
+
+    <section class="panel gallery" id="gallery"></section>
+  </main>
+
+  <script src="/app.js" type="module"></script>
+</body>
+</html>

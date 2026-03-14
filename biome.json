@@ -1,0 +1,10 @@
+{
+	"$schema": "https://biomejs.dev/schemas/2.4.4/schema.json",
+	"files": {
+		"includes": [
+			"scripts/ui_golden_viewer_assets/**/*.{html,css,js}",
+			"tests/ui/fixtures/**/*.json"
+		],
+		"ignoreUnknown": true
+	}
+}

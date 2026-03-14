@@ -1,0 +1,27 @@
+dependencies:
+  esp_codec_dev:
+    public: true
+    version: ^1
+  espressif/esp_lcd_jd9365:
+    version: ^2
+  esp_lcd_touch_gsl3680:
+    path: ../esp_lcd_touch_gsl3680
+  esp_lvgl_port:
+    path: ../esp_lvgl_port
+    public: true
+  idf: '>=5.3'
+  lvgl/lvgl:
+    public: true
+    version: 9.4.0
+description: >
+  Custom Board Support Package (BSP) for JC8012P4A1C board (ESP32-P4 based).
+  Based on espressif/esp32_p4_function_ev_board v4.1.1 with modifications for
+  JD9365 LCD controller, GSL3680 touch controller, and custom GPIO pinout.
+maintainer: Custom/Local
+tags:
+- bsp
+- custom
+- jc8012p4a1c
+targets:
+- esp32p4
+version: 1.0.0-jc8012p4a1c
