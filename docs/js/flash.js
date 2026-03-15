@@ -30,9 +30,16 @@ function initFlash() {
   const logClearBtn = document.getElementById("log-clear-btn");
   const eraseAllCb = document.getElementById("erase-all-cb");
 
+  const BOARD_LABELS = {
+    jc8012p4a1c: 'JC8012P4A1C (10.1" 800x1280)',
+    jc4880p443c: 'JC4880P443C (4.3" 480x800)',
+    jc1060p470c: 'JC1060P470C (7.0" 1024x600)',
+  };
+
   let transport = null;
   let esploader = null;
   let connected = false;
+  let releasesData = [];
 
   // --- Logging ---
 
@@ -65,21 +72,22 @@ function initFlash() {
       const resp = await fetch(base + "firmware/index.json");
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       const data = await resp.json();
+      releasesData = data.releases;
 
       releaseSelect.innerHTML = "";
-      if (data.releases.length === 0) {
+      if (releasesData.length === 0) {
         releaseSelect.innerHTML =
           '<option value="">No releases available</option>';
         return;
       }
-      for (const rel of data.releases) {
+      for (const rel of releasesData) {
         const opt = document.createElement("option");
         opt.value = rel.tag;
         opt.textContent = rel.tag;
         releaseSelect.appendChild(opt);
       }
       releaseSelect.disabled = false;
-      boardSelect.disabled = false;
+      populateBoards();
       updateConnectButton();
     } catch (e) {
       releaseSelect.innerHTML =
@@ -87,6 +95,33 @@ function initFlash() {
       log("Error loading releases: " + e.message);
     }
   }
+
+  function populateBoards() {
+    const tag = releaseSelect.value;
+    const rel = releasesData.find((r) => r.tag === tag);
+    const boards = rel ? rel.boards : [];
+
+    boardSelect.innerHTML = '<option value="">Select a board...</option>';
+    for (const board of boards) {
+      const opt = document.createElement("option");
+      opt.value = board;
+      opt.textContent = BOARD_LABELS[board] || board;
+      boardSelect.appendChild(opt);
+    }
+    boardSelect.disabled = boards.length === 0;
+  }
+
+  releaseSelect.addEventListener("change", () => {
+    populateBoards();
+    updateConnectButton();
+  });
+
+  boardSelect.addEventListener("change", () => {
+    updateConnectButton();
+    if (connected) {
+      flashBtn.disabled = !boardSelect.value;
+    }
+  });
 
   // --- WebSerial connection ---
 
@@ -96,7 +131,7 @@ function initFlash() {
       connectBtn.disabled = true;
       return;
     }
-    connectBtn.disabled = !releaseSelect.value;
+    connectBtn.disabled = !releaseSelect.value || !boardSelect.value;
     connectBtn.textContent = connected ? "Disconnect" : "Connect";
   }
 
@@ -133,7 +168,9 @@ function initFlash() {
       log(`Connected: ${chip}`);
 
       connected = true;
-      flashBtn.disabled = false;
+      releaseSelect.disabled = true;
+      boardSelect.disabled = true;
+      flashBtn.disabled = !boardSelect.value;
       updateConnectButton();
     } catch (e) {
       log("Connection failed: " + e.message);
@@ -152,6 +189,8 @@ function initFlash() {
     transport = null;
     esploader = null;
     connected = false;
+    releaseSelect.disabled = false;
+    boardSelect.disabled = false;
     flashBtn.disabled = true;
     updateConnectButton();
   }

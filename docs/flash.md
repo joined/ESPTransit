@@ -19,9 +19,7 @@ Flash ESPTransit firmware directly from your browser using WebSerial.
   <div class="flash-row">
     <label for="board-select">Board</label>
     <select id="board-select" disabled>
-      <option value="jc8012p4a1c">JC8012P4A1C (10.1" 800x1280)</option>
-      <option value="jc4880p443c">JC4880P443C (4.3" 480x800)</option>
-      <option value="jc1060p470c">JC1060P470C (7.0" 1024x600)</option>
+      <option value="">Select a board...</option>
     </select>
   </div>
 
