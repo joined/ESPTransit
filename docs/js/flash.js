@@ -28,6 +28,7 @@ function initFlash() {
   const logContainer = document.getElementById("log-container");
   const flashLog = document.getElementById("flash-log");
   const logClearBtn = document.getElementById("log-clear-btn");
+  const eraseAllCb = document.getElementById("erase-all-cb");
 
   let transport = null;
   let esploader = null;
@@ -201,7 +202,7 @@ function initFlash() {
         flashSize: "16MB",
         flashMode: "dio",
         flashFreq: "80m",
-        eraseAll: false,
+        eraseAll: eraseAllCb.checked,
         compress: true,
         reportProgress: (_fileIndex, written, total) => {
           const filePct = (written / total) * 100;

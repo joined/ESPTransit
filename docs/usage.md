@@ -17,7 +17,7 @@ That's it — no build tools, no command line.
 After flashing, the board reboots into the **WiFi Setup** screen:
 
 <figure markdown>
-  ![WiFi setup screen](screenshots/jc8012p4a1c/wifi_setup_screen_portrait.png){ width="250" }
+  ![WiFi setup screen](screenshots/jc1060p470c/wifi_setup_screen_landscape.png){ width="400" }
 </figure>
 
 1. The board scans for nearby WiFi networks and lists them on screen
@@ -26,7 +26,7 @@ After flashing, the board reboots into the **WiFi Setup** screen:
 4. The board connects and saves the credentials
 
 <figure markdown>
-  ![WiFi password entry](screenshots/jc8012p4a1c/wifi_password_keyboard_opened_portrait.png){ width="250" }
+  ![WiFi password entry](screenshots/jc1060p470c/wifi_password_keyboard_opened_landscape.png){ width="400" }
 </figure>
 
 !!! tip
@@ -37,11 +37,11 @@ After flashing, the board reboots into the **WiFi Setup** screen:
 After connecting to WiFi, the **Station Search** screen appears:
 
 <figure markdown>
-  ![Station search](screenshots/jc8012p4a1c/station_search_screen_portrait.png){ width="250" }
+  ![Station search](screenshots/jc1060p470c/station_search_screen_landscape.png){ width="400" }
 </figure>
 
-1. Type the name of your departure station
-2. Select it from the search results
+1. Search for your departure station by name
+2. Select it from the results
 3. The board saves your selection and starts showing departures
 
 ## 5. Done!
@@ -65,7 +65,7 @@ Tap anywhere on the departures display to open the **Settings** screen, where yo
 - **Open the debug screen** — view device info and diagnostics
 
 <figure markdown>
-  ![Settings screen](screenshots/jc8012p4a1c/settings_opened_portrait.png){ width="250" }
+  ![Settings screen](screenshots/jc1060p470c/settings_opened_landscape.png){ width="400" }
 </figure>
 
 ## Troubleshooting
@@ -80,4 +80,4 @@ Tap anywhere on the departures display to open the **Settings** screen, where yo
 : Check that the board has internet access. The departure data comes from an online API, so the board needs a working internet connection.
 
 **I want to start over**
-: Re-flash the firmware using the [Web Flasher](flash.md). This resets all settings.
+: Re-flash the firmware using the [Web Flasher](flash.md) with the **"Erase all data"** checkbox enabled. This resets all settings (station, rotation, brightness, etc.) to defaults. Note that WiFi credentials are stored on the companion ESP32-C6 chip and cannot be erased this way — to change WiFi networks, use the Settings screen.

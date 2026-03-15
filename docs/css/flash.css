@@ -23,7 +23,19 @@
   border-radius: 4px;
   background: var(--md-default-bg-color);
   color: var(--md-default-fg-color);
-  font-size: 0.9rem;
+  font-size: 0.8rem;
+}
+
+.flash-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.flash-checkbox input {
+  cursor: pointer;
 }
 
 .flash-buttons {
@@ -123,8 +135,8 @@
   background: var(--md-code-bg-color);
   border: 1px solid var(--md-default-fg-color--lightest);
   border-radius: 0 0 4px 4px;
-  font-size: 0.8rem;
-  line-height: 1.5;
+  font-size: 0.7rem;
+  line-height: 1.4;
   color: var(--md-code-fg-color);
   white-space: pre-wrap;
   word-break: break-all;

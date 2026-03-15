@@ -25,6 +25,13 @@ Flash ESPTransit firmware directly from your browser using WebSerial.
     </select>
   </div>
 
+  <div class="flash-options">
+    <label class="flash-checkbox">
+      <input type="checkbox" id="erase-all-cb">
+      Erase all data (reset settings to defaults)
+    </label>
+  </div>
+
   <div class="flash-buttons">
     <button id="connect-btn" class="md-button" disabled>Connect</button>
     <button id="flash-btn" class="md-button md-button--primary" disabled>Flash</button>
