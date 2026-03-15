@@ -253,7 +253,11 @@ function initFlash() {
       await esploader.writeFlash(flashOptions);
 
       log("Resetting device...");
-      await esploader.after();
+      // Use custom reset sequence instead of default hard_reset, which only
+      // sets RTS=false. After flashing, RTS is already false so that's a
+      // no-op. Explicitly toggle RTS high then low to guarantee an edge
+      // transition on the EN/reset pin.
+      await esploader.after("custom_reset", false, "R1|W100|R0");
 
       setProgress("Done!", 100);
       log("Flash complete! Device has been reset and should be booting.");
