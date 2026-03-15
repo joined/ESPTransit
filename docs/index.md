@@ -2,7 +2,9 @@
 
 Open-source firmware that turns ESP32-P4 touchscreen boards into real-time departure displays for German rail and transit systems.
 
-![Departures board showing 4 stations in split mode](screenshots/jc1060p470c/departures_4_stations_split_mode_landscape.png)
+<video autoplay loop muted playsinline>
+  <source src="assets/demo.webm" type="video/webm">
+</video>
 
 ## Features
 
