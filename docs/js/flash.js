@@ -214,7 +214,7 @@ function initFlash() {
       await esploader.writeFlash(flashOptions);
 
       log("Resetting device...");
-      await esploader.hardReset();
+      await esploader.after();
 
       setProgress("Done!", 100);
       log("Flash complete! Device has been reset and should be booting.");
