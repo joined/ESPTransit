@@ -15,7 +15,7 @@ test = [
   "pillow>=10.0,<13.0",
 ]
 docs = [
-  "mkdocs-material>=9.0,<10.0",
+  "mkdocs-material>=9.7.6,<10.0",
   "mkdocs-glightbox>=0.4,<1.0",
 ]
 
