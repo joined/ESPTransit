@@ -11,7 +11,7 @@ package = false
 [dependency-groups]
 test = [
   "pytest>=8.0,<10.0",
-  "pytest-xdist>=3.6,<4.0",
+  "pytest-xdist>=3.8.0,<4.0",
   "pillow>=10.0,<13.0",
 ]
 docs = [
