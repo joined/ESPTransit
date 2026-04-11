@@ -16,7 +16,7 @@ test = [
 ]
 docs = [
   "mkdocs-material>=9.0,<10.0",
-  "mkdocs-glightbox>=0.4,<1.0",
+  "mkdocs-glightbox>=0.5.2,<1.0",
 ]
 
 [tool.ruff]
